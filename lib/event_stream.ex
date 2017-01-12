@@ -3,15 +3,25 @@ defmodule EventStream do
   Documentation for EventStream.
   """
 
-  defmacro queue do
+  def queue do
     quote do
       use EventStream.Queue
     end
   end
 
-  defmacro __using__(key) do
+  def handler(subscribe) do
+    quote do
+      use EventStream.Handler, subscribe: unquote(subscribe)
+    end
+  end
+
+  defmacro __using__(opts \\ []) do
+    key = Keyword.get opts, :type, :queue
+    subscribe = Keyword.get opts, :subscribe
+
     case key do
-      :queue -> queue
+      :queue -> queue()
+      :handler -> handler(subscribe)
     end
   end
 end

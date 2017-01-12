@@ -1,0 +1,2 @@
+%{"gen_stage": {:hex, :gen_stage, "0.10.0", "ce1eb93a3f9708f2e215f70b3d3c7f55dea4a4ed7e9615195e28d543c9086656", [:mix], []},
+  "uuid": {:hex, :uuid, "1.1.6", "4927232f244e69c6e255643014c2d639dad5b8313dc2a6976ee1c3724e6ca60d", [:mix], []}}
