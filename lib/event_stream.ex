@@ -3,16 +3,15 @@ defmodule EventStream do
   Documentation for EventStream.
   """
 
-  @doc """
-  Hello world.
+  defmacro queue do
+    quote do
+      use EventStream.Queue
+    end
+  end
 
-  ## Examples
-
-      iex> EventStream.hello
-      :world
-
-  """
-  def hello do
-    :world
+  defmacro __using__(key) do
+    case key do
+      :queue -> queue
+    end
   end
 end

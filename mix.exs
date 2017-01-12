@@ -28,6 +28,7 @@ defmodule EventStream.Mixfile do
   #
   # Type "mix help deps" for more examples and options
   defp deps do
-    [{:gen_stage, "~> 0.10.0"}]
+    [{:gen_stage, "~> 0.10.0"},
+     {:uuid, "~> 1.1"}]
   end
 end
