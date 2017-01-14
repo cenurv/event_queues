@@ -1,4 +1,4 @@
-defmodule EventStreamTest do
+defmodule EventQueuesTest do
   use ExUnit.Case
 
   test "Test Sync Notify" do
@@ -31,7 +31,7 @@ defmodule EventStreamTest do
     SampleQueue.sync_notify(category: :ticket, name: :insert, data: %{id: 15, pid: self()})
 
     receive do
-      event ->
+      _ ->
         assert "Event should not arrive." == true
     after
       100 -> nil

@@ -1,4 +1,6 @@
-defmodule EventStream.Handler do
+defmodule EventQueues.Handler do
+  @moduledoc false
+
   defmacro __using__(opts) do
     subscribe = Keyword.get opts, :subscribe
 
@@ -25,7 +27,7 @@ defmodule EventStream.Handler do
         {:noreply, [], state}
       end
 
-      def handle(%EventStream.Event{} = event) do
+      def handle(%EventQueues.Event{} = event) do
         IO.puts "No handle defined in module #{__MODULE__}"
       end
 

@@ -1,4 +1,4 @@
 defmodule SampleQueue do
-  use EventStream, type: :queue
+  use EventQueues, type: :queue
 
 end

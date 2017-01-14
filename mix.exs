@@ -1,14 +1,28 @@
-defmodule EventStream.Mixfile do
+defmodule EventQueues.Mixfile do
   use Mix.Project
 
+   @version "1.0.0"
+
   def project do
-    [app: :event_stream,
-     version: "0.1.0",
+    [app: :event_queues,
+     version: @version,
      elixir: "~> 1.4",
      elixirc_paths: elixirc_paths(Mix.env),
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     deps: deps()]
+     deps: deps(),
+     description: "Provides helpers in Elixir to create GenStage based event queues and handlers",
+     name: "Event Queues",
+     package: %{
+       licenses: ["Apache 2.0"],
+       maintainers: ["Joseph Lindley"],
+       links: %{"GitHub" => "https://github.com/cenurv/event_queues"},
+       files: ~w(mix.exs README.md CHANGELOG.md lib)
+     },
+     docs: [source_ref: "v#{@version}", main: "readme",
+            canonical: "http://hexdocs.pm/event_queues",
+            source_url: "https://github.com/cenurv/event_queues",
+            extras: ["CHANGELOG.md", "README.md"]]]
   end
 
   # Configuration for the OTP application
@@ -34,6 +48,7 @@ defmodule EventStream.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [{:gen_stage, "~> 0.10.0"},
-     {:uuid, "~> 1.1"}]
+     {:uuid, "~> 1.1"},
+     {:ex_doc, "~> 0.14", only: [:docs, :dev]},]
   end
 end

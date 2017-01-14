@@ -1,4 +1,6 @@
-defmodule EventStream.Queue do
+defmodule EventQueues.Queue do
+  @moduledoc false
+
   defmacro __using__(_opts) do
     quote do
       alias Experimental.GenStage
@@ -10,20 +12,20 @@ defmodule EventStream.Queue do
       end
 
       def sync_notify(event, timeout \\ 5000)
-      def sync_notify(%EventStream.Event{} = event, timeout) do
+      def sync_notify(%EventQueues.Event{} = event, timeout) do
         GenStage.call(__MODULE__, {:notify, event}, timeout)
       end
       def sync_notify(fields, timeout) do
-        sync_notify EventStream.Event.new(fields), timeout
+        sync_notify EventQueues.Event.new(fields), timeout
       end
 
-      def async_notify(%EventStream.Event{} = event) do
+      def async_notify(%EventQueues.Event{} = event) do
         spawn fn ->
           sync_notify event
         end
       end
       def async_notify(fields) do
-        async_notify EventStream.Event.new(fields)
+        async_notify EventQueues.Event.new(fields)
       end
 
       ## Callbacks

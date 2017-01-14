@@ -1,17 +1,15 @@
-defmodule EventStream do
-  @moduledoc """
-  Documentation for EventStream.
-  """
+defmodule EventQueues do
+  @moduledoc false
 
   def queue do
     quote do
-      use EventStream.Queue
+      use EventQueues.Queue
     end
   end
 
   def handler(subscribe) do
     quote do
-      use EventStream.Handler, subscribe: unquote(subscribe)
+      use EventQueues.Handler, subscribe: unquote(subscribe)
     end
   end
 
