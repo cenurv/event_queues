@@ -11,21 +11,21 @@ defmodule EventQueues.Queue do
         GenStage.start_link(__MODULE__, :ok, name: __MODULE__)
       end
 
-      def sync_notify(event, timeout \\ 5000)
-      def sync_notify(%EventQueues.Event{} = event, timeout) do
+      def announce_sync(event, timeout \\ 5000)
+      def announce_sync(%EventQueues.Event{} = event, timeout) do
         GenStage.call(__MODULE__, {:notify, event}, timeout)
       end
-      def sync_notify(fields, timeout) do
-        sync_notify EventQueues.Event.new(fields), timeout
+      def announce_sync(fields, timeout) do
+        announce_sync EventQueues.Event.new(fields), timeout
       end
 
-      def async_notify(%EventQueues.Event{} = event) do
+      def announce(%EventQueues.Event{} = event) do
         spawn fn ->
-          sync_notify event
+          announce_sync event
         end
       end
-      def async_notify(fields) do
-        async_notify EventQueues.Event.new(fields)
+      def announce(fields) do
+        announce EventQueues.Event.new(fields)
       end
 
       ## Callbacks

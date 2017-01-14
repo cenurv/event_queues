@@ -1,6 +1,8 @@
 # Event Queues #
 
-This library provides helpers in Elixir to create GenStage broadcast based event queues and handlers. 
+This library provides helpers in Elixir to create GenStage broadcast based event queues and handlers.
+
+This library is built to work on Elixir 1.4 or later.
 
 ## Installation ##
 
@@ -63,6 +65,21 @@ defmodule BoatInventoryQueue do
 end
 ```
 
+## Announce Events ##
+
+Queue Functions:
+
+* `announce`              - Sends the event to the queue to be broadcast. Does not wait for the event to be accepted by the queue before returning.
+* `announce_sync`         - Sends the event to the queue to be broadcast. Waits for the event to be accepted by the queue before returning.
+This does not wait for events to be handled as that event dispatching and handeling are always asynchronous.
+
+Both function take either a `EventQueues.Event` struct or a keyword list of the values for the event. See `EventQueues.Event.new/1`.
+
+```elixir
+VehicleInventoryQueue.announce category: :car, name: :sold, data: %{}
+VehicleInventoryQueue.announce_sync category: :car, name: :sold, data: %{}
+```
+
 ## Handlers ##
 
 An event handler is a GenStage consumer that spawns an asynchronous handler process for each event broadcast from a queue.
@@ -93,5 +110,40 @@ defmodule RegistrationBoatHandler do
     # Custom logic here that would register the vehicle electronically.
   end
   def handle(_event), do: nil
+end
+```
+
+## Starting ##
+
+Each module created is a ordinary GenServer that must be started with your application.
+
+```elixir
+VehicleInventoryQueue.start_link()
+BoatInventoryQueue.start_link()
+RegistrationVehicleHandler.start_link()
+LoanVehicleHandler.start_link()
+RegistrationBoatHandler.start_link()
+```
+
+Or the modules can be added to a supervisor:
+
+```elixir
+defmodule MyApp do
+  use Application
+
+  def start(_type, _args) do
+    import Supervisor.Spec, warn: false
+
+    children = [
+      worker(VehicleInventoryQueue, [])
+      worker(BoatInventoryQueue, [])
+      worker(RegistrationVehicleHandler, [])
+      worker(LoanVehicleHandler, [])
+      worker(RegistrationBoatHandler, [])
+    ]
+
+    opts = [strategy: :one_for_one, name: MyApp.Supervisor]
+    Supervisor.start_link(children, opts)
+  end
 end
 ```
