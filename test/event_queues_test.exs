@@ -2,7 +2,7 @@ defmodule EventQueuesTest do
   use ExUnit.Case
 
   test "Test Sync Notify" do
-    SampleQueue.sync_notify(category: :ticket, name: :update, data: %{id: 15, pid: self()})
+    SampleQueue.announce_sync(category: :ticket, name: :update, data: %{id: 15, pid: self()})
 
     receive do
       event ->
@@ -15,7 +15,7 @@ defmodule EventQueuesTest do
   end
 
   test "Test Async Notify" do
-    SampleQueue.async_notify(category: :ticket, name: :update, data: %{id: 123456, pid: self()})
+    SampleQueue.announce(category: :ticket, name: :update, data: %{id: 123456, pid: self()})
 
     receive do
       event ->
@@ -28,7 +28,7 @@ defmodule EventQueuesTest do
   end
 
   test "Test Matching" do
-    SampleQueue.sync_notify(category: :ticket, name: :insert, data: %{id: 15, pid: self()})
+    SampleQueue.announce_sync(category: :ticket, name: :insert, data: %{id: 15, pid: self()})
 
     receive do
       _ ->
