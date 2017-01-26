@@ -147,3 +147,68 @@ defmodule MyApp do
   end
 end
 ```
+
+## Announcers ##
+
+A module can add a set of predefined events that can be called on a module that integrates Event Queues into other libraries.
+
+```elixir
+defmodule LibraryModule do
+
+  defmacro __using__(_) do
+    quote do
+      use EventQueues, type: :announcer
+
+      defevents [:after_action]
+
+      def execute_action do
+        # Perform some action
+
+        if has_after_action? do
+          on_after_action category: __MODULE__, name: :after_action
+        end
+      end
+    end
+  end
+end
+
+defmodule AppModule do
+  use LibraryModule
+
+  create_queue()
+
+  announces  events: [:after_action]
+end
+
+def AppHandler do
+  use EventQueues, type: :handler, subscribe: AppModule
+
+  def handle(event) do
+    # Handle the event.
+  end
+end
+
+# Start the event queue and handler.
+AppModule.start_link
+AppHandler.start_link
+
+# Call the function created by the library.
+# The event will be executed as part of the function.
+AppModule.execute_action
+```
+
+A module built with the announcer macros can be used with any Queue.
+
+```elixir
+defmodule AppQueue do
+  use EventQueues, type: :queue
+end
+
+defmodule AppModule do
+  use LibraryModule
+
+  announces  events: [:after_action],
+             queues: [AppQueue]
+end
+
+```
