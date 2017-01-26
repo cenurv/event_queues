@@ -7,6 +7,10 @@ defmodule EventQueues.Queue do
 
       use GenStage
 
+      def is_queue? do
+        :ok
+      end
+
       def start_link() do
         GenStage.start_link(__MODULE__, :ok, name: __MODULE__)
       end

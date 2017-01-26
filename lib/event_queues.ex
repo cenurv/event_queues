@@ -13,6 +13,12 @@ defmodule EventQueues do
     end
   end
 
+  def announcer do
+    quote do
+      use EventQueues.Announcer
+    end
+  end
+
   defmacro __using__(opts \\ []) do
     key = Keyword.get opts, :type, :queue
     subscribe = Keyword.get opts, :subscribe
@@ -20,6 +26,13 @@ defmodule EventQueues do
     case key do
       :queue -> queue()
       :handler -> handler(subscribe)
+      :announcer -> announcer()
+    end
+  end
+
+  defmacro defevents(events) when is_list events do
+    quote do
+      EventQueues.Announcer.defevents unquote(events)
     end
   end
 end

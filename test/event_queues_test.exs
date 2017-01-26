@@ -38,4 +38,19 @@ defmodule EventQueuesTest do
     end
   end
 
+  test "Announcer and handler" do
+    SampleAnnouncer.execute_event
+
+    assert true == SampleAnnouncer.has_after_insert?
+    assert false == SampleAnnouncer.has_after_update?
+
+    receive do
+      event ->
+        assert event.category == :test 
+        assert event.name == :after_insert
+    after
+      500 -> assert "Did not receive response." == true
+    end
+  end
+
 end

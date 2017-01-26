@@ -16,7 +16,17 @@ defmodule EventQueues.Handler do
       def init(:ok) do
         # Starts a permanent subscription to the broadcaster
         # which will automatically start requesting items.
-        {:consumer, :ok, subscribe_to: [unquote(subscribe)]}
+
+        if Code.ensure_compiled?(unquote(subscribe).Queue) do
+          subscribe_queue unquote(subscribe).Queue
+        else
+          subscribe_queue unquote(subscribe)
+        end
+      end
+
+      def subscribe_queue(queue) do
+        :ok = apply queue, :is_queue?, []
+        {:consumer, :ok, subscribe_to: [queue]}
       end
 
       def handle_events(events, _from, state) do
