@@ -1,12 +1,12 @@
 defmodule EventQueues.Mixfile do
   use Mix.Project
 
-   @version "1.1.0"
+   @version "1.1.1"
 
   def project do
     [app: :event_queues,
      version: @version,
-     elixir: "~> 1.4",
+     elixir: "~> 1.3",
      elixirc_paths: elixirc_paths(Mix.env),
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
