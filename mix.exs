@@ -47,7 +47,7 @@ defmodule EventQueues.Mixfile do
   #
   # Type "mix help deps" for more examples and options
   defp deps do
-    [{:gen_stage, "~> 0.10.0"},
+    [{:gen_stage, "~> 0.11"},
      {:uuid, "~> 1.1"},
      {:ex_doc, "~> 0.14", only: [:docs, :dev]},]
   end
