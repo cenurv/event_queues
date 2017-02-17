@@ -5,8 +5,6 @@ defmodule EventQueues.Handler do
     subscribe = Keyword.get opts, :subscribe
 
     quote do
-      alias Experimental.GenStage
-
       use GenStage
 
       def start_link() do

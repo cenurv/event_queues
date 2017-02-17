@@ -3,8 +3,6 @@ defmodule EventQueues.Queue do
 
   defmacro __using__(_opts) do
     quote do
-      alias Experimental.GenStage
-
       use GenStage
 
       def is_queue? do
