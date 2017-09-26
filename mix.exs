@@ -1,12 +1,12 @@
 defmodule EventQueues.Mixfile do
   use Mix.Project
 
-   @version "1.1.2"
+   @version "1.1.3"
 
   def project do
     [app: :event_queues,
      version: @version,
-     elixir: "~> 1.3",
+     elixir: "~> 1.4",
      elixirc_paths: elixirc_paths(Mix.env),
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
@@ -47,8 +47,8 @@ defmodule EventQueues.Mixfile do
   #
   # Type "mix help deps" for more examples and options
   defp deps do
-    [{:gen_stage, "~> 0.11"},
+    [{:gen_stage, "~> 0.12"},
      {:uuid, "~> 1.1"},
-     {:ex_doc, "~> 0.14", only: [:docs, :dev]},]
+     {:ex_doc, "~> 0.16", only: [:docs, :dev]},]
   end
 end
