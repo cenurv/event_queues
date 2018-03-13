@@ -21,7 +21,7 @@ defmodule EventQueues.Handler do
     library = Keyword.get opts, :library, :gen_stage
     subscribe = Keyword.get opts, :subscribe, "amq.topic"
     configuration = Keyword.get opts, :configuration, []
-    filter = Keyword.get opts, :filter, "#"
+    filter = "#{Keyword.get opts, :category, "*"}.#{Keyword.get opts, :name, "*"}"
 
     case library do
       :amqp -> amqp_handler(configuration, subscribe, filter)

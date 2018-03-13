@@ -58,6 +58,7 @@ defmodule EventQueues.Queue do
       def announce_sync(event, timeout \\ 5000)
       def announce_sync(%EventQueues.Event{} = event, _timeout) do
         GenServer.cast(__MODULE__, {:notify, event})
+        :ok
       end
       def announce_sync(fields, timeout) do
         announce_sync EventQueues.Event.new(fields), timeout
@@ -67,6 +68,7 @@ defmodule EventQueues.Queue do
         spawn fn ->
           announce_sync event
         end
+        :ok
       end
       def announce(fields) do
         announce EventQueues.Event.new(fields)
