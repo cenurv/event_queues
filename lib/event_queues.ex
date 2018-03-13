@@ -1,19 +1,19 @@
 defmodule EventQueues do
   @moduledoc false
 
-  def queue(opts) do
+  defp queue(opts) do
     quote do
       use EventQueues.Queue, unquote(opts)
     end
   end
 
-  def handler(opts) do
+  defp handler(opts) do
     quote do
       use EventQueues.Handler, unquote(opts)
     end
   end
 
-  def announcer do
+  defp announcer do
     quote do
       use EventQueues.Announcer
     end
