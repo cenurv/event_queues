@@ -1,15 +1,15 @@
 defmodule EventQueues do
   @moduledoc false
 
-  def queue do
+  def queue(opts) do
     quote do
-      use EventQueues.Queue
+      use EventQueues.Queue, unquote(opts)
     end
   end
 
-  def handler(subscribe) do
+  def handler(opts) do
     quote do
-      use EventQueues.Handler, subscribe: unquote(subscribe)
+      use EventQueues.Handler, unquote(opts)
     end
   end
 
@@ -21,11 +21,10 @@ defmodule EventQueues do
 
   defmacro __using__(opts \\ []) do
     key = Keyword.get opts, :type, :queue
-    subscribe = Keyword.get opts, :subscribe
 
     case key do
-      :queue -> queue()
-      :handler -> handler(subscribe)
+      :queue -> queue(opts)
+      :handler -> handler(opts)
       :announcer -> announcer()
     end
   end

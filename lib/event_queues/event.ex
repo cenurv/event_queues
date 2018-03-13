@@ -35,4 +35,16 @@ defmodule EventQueues.Event do
                        created: created,
                        data: data}
   end
+
+  def serialize(%__MODULE__{} = event) do
+    event
+    |> :erlang.term_to_binary
+    |> Base.encode64
+  end
+
+  def deserialize(content) when is_binary content do
+    content
+    |> Base.decode64!
+    |> :erlang.binary_to_term
+  end
 end
