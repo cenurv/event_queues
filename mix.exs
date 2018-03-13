@@ -1,7 +1,7 @@
 defmodule EventQueues.Mixfile do
   use Mix.Project
 
-   @version "1.1.3"
+   @version "2.0.0"
 
   def project do
     [app: :event_queues,
@@ -51,6 +51,6 @@ defmodule EventQueues.Mixfile do
      {:amqp, "~> 0.2.3", optional: true},
      {:poison, "~> 3.1", optional: true},
      {:uuid, "~> 1.1"},
-     {:ex_doc, "~> 0.16", only: [:docs, :dev]},]
+     {:ex_doc, "~> 0.18", only: [:docs, :dev]},]
   end
 end
