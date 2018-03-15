@@ -18,11 +18,19 @@ defmodule EventQueues.Handler do
   * `:socket_options` - Extra socket options. These are appended to the default options. See http://www.erlang.org/doc/man/inet.html#setopts-2 and http://www.erlang.org/doc/man/gen_tcp.html#connect-4 for descriptions of the available options.
   """
   defmacro __using__(opts) do
-    library = Keyword.get opts, :library, :gen_stage
-    subscribe = Keyword.get opts, :subscribe, "amq.topic"
+    subscribe = Keyword.get opts, :subscribe, nil
     configuration = Keyword.get opts, :configuration, []
     category = Keyword.get(opts, :category, "*")
     name = Keyword.get(opts, :name, "*")
+
+    if is_nil(subscribe) do
+      throw "Missing subscription queue module, cannot build handler."
+    end
+
+    # Check the module subcribing to set the library type.
+    # There is never a good reason to use different library on a handler
+    # then on the queue it is subscribing to.
+    library = Macro.expand(subscribe, __CALLER__).library
 
     case library do
       :exq -> exq_handler(subscribe, category, name)

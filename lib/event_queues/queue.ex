@@ -37,6 +37,8 @@ defmodule EventQueues.Queue do
     quote do
       use GenServer
 
+      def library, do: :exq
+
       def perform(event) do
         event = EventQueues.Event.deserialize(event)
         registry = GenServer.call(__MODULE__, :get)
@@ -114,6 +116,8 @@ defmodule EventQueues.Queue do
       use GenServer
       require Logger
 
+      def library, do: :amqp
+
       def start_link() do
         GenServer.start_link(__MODULE__, [], name: __MODULE__)
       end
@@ -177,6 +181,8 @@ defmodule EventQueues.Queue do
   defp genstage_queue do
     quote do
       use GenStage
+
+      def library, do: :gen_stage
 
       def is_queue? do
         :ok

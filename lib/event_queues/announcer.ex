@@ -22,10 +22,11 @@ defmodule EventQueues.Announcer do
 
   defmacro create_queue(opts \\ []) do
     library = Keyword.get opts, :library, :gen_stage
+    configuration = Keyword.get opts, :configuration, []
 
     quote do
       defmodule Queue do
-        use EventQueues, type: :queue, library: unquote(library)
+        use EventQueues, type: :queue, library: unquote(library), configuration: unquote(configuration)
       end
 
       def start_link, do: __MODULE__.Queue.start_link
