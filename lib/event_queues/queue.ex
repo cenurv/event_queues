@@ -1,13 +1,111 @@
 defmodule EventQueues.Queue do
   @moduledoc false
 
+  @doc """
+  EXQ Configurationm
+  * `:concurrency` - Defaults `:infinite`
+
+  AMQP Configuration
+
+  * `:username` - The name of a user registered with the broker (defaults to "guest");
+  * `:password` - The password of user (defaults to "guest");
+  * `:virtual_host` - The name of a virtual host in the broker (defaults to "/");
+  * `:host` - The hostname of the broker (defaults to "localhost");
+  * `:port` - The port the broker is listening on (defaults to 5672);
+  * `:channel_max` - The channel_max handshake parameter (defaults to 0);
+  * `:frame_max` - The frame_max handshake parameter (defaults to 0);
+  * `:heartbeat` - The hearbeat interval in seconds (defaults to 10);
+  * `:connection_timeout` - The connection timeout in milliseconds (defaults to 60000);
+  * `:ssl_options` - Enable SSL by setting the location to cert files (defaults to none);
+  * `:client_properties` - A list of extra client properties to be sent to the server, defaults to [];
+  * `:socket_options` - Extra socket options. These are appended to the default options. See http://www.erlang.org/doc/man/inet.html#setopts-2 and http://www.erlang.org/doc/man/gen_tcp.html#connect-4 for descriptions of the available options.
+  """
   defmacro __using__(opts \\ []) do
     library = Keyword.get opts, :library, :gen_stage
     configuration = Keyword.get opts, :configuration, []
 
     case library do
+      :exq -> exq_queue(configuration)
       :amqp -> amqp_queue(configuration)
       :gen_stage -> genstage_queue()
+    end
+  end
+
+  defp exq_queue(configuration) do
+    concurrency = Keyword.get configuration, :concurrency, :infinite
+
+    quote do
+      use GenServer
+
+      def perform(event) do
+        event = EventQueues.Event.deserialize(event)
+        registry = GenServer.call(__MODULE__, :get)
+        category = event.category
+        name = event.name
+
+        # Construct a list of modules that should be called.
+        # The keys are specified by the filter of the handler module.
+        specific_event = "#{category}.#{name}"
+        any_category = "*.#{name}"
+        any_event = "#{category}.*"
+        all_events = "*.*"
+
+        modules = [registry[specific_event], registry[any_category], registry[any_event], registry[all_events]]
+        modules = Enum.reject(modules, &(is_nil(&1)))
+        modules = List.flatten(modules)
+
+        # Pass the event to all valid handlers.
+        Enum.each modules, fn(module) ->
+          GenServer.cast(module, {:handle, event})
+        end
+      end
+
+      def start_link() do
+        Exq.subscribe(Exq, to_string(__MODULE__), unquote(concurrency))
+        GenServer.start_link(__MODULE__, [], name: __MODULE__)
+      end
+
+      def init(_opts) do
+        {:ok, %{}}
+      end
+
+      def handle_call(:get, _from, registry) do
+        {:reply, registry, registry}
+      end
+
+      def handle_cast({:register, filter, module}, registry) do
+        registry =
+          if registry[filter] do
+            Map.put(registry, filter, registry[filter] ++ [module])
+          else
+            Map.put(%{}, filter, [module])
+          end
+
+        {:noreply, registry}
+      end
+
+      def is_queue? do
+        :ok
+      end
+
+      def announce_sync(event, timeout \\ 5000)
+      def announce_sync(%EventQueues.Event{} = event, _timeout) do
+        Exq.enqueue(Exq, to_string(__MODULE__), __MODULE__, [EventQueues.Event.serialize(event)])
+        :ok
+      end
+      def announce_sync(fields, timeout) do
+        announce_sync EventQueues.Event.new(fields), timeout
+      end
+
+      def announce(%EventQueues.Event{} = event) do
+        spawn fn ->
+          announce_sync event
+        end
+        :ok
+      end
+      def announce(fields) do
+        announce EventQueues.Event.new(fields)
+      end
     end
   end
 
@@ -41,7 +139,7 @@ defmodule EventQueues.Queue do
       # Implement a callback to handle DOWN notifications from the system
       # This callback should try to reconnect to the server
       def handle_info({:DOWN, _, :process, _pid, _reason}, _) do
-        Logger.info("#{__MODULE__} is restablishing connection over AMQP.")
+        Logger.debug("#{__MODULE__} is restablishing connection over AMQP.")
         {:ok, channel} = amqp_connect()
         {:noreply, channel}
       end

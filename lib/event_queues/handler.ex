@@ -24,8 +24,37 @@ defmodule EventQueues.Handler do
     filter = "#{Keyword.get opts, :category, "*"}.#{Keyword.get opts, :name, "*"}"
 
     case library do
+      :exq -> exq_handler(subscribe, filter)
       :amqp -> amqp_handler(configuration, subscribe, filter)
       :gen_stage -> gen_stage_handler(subscribe)
+    end
+  end
+
+  defp exq_handler(subscribe, filter) do
+    quote do
+      use GenServer
+
+      require Logger
+
+      def start_link do
+        GenServer.cast(unquote(subscribe), {:register, unquote(filter), __MODULE__})
+        GenServer.start_link(__MODULE__, [], name: __MODULE__)
+      end
+
+      def init(_opts) do
+        {:ok, nil}
+      end
+
+      def handle_cast({:handle, event}, state) do
+        __MODULE__.handle(event)
+        {:noreply, state}
+      end
+
+      def handle(%EventQueues.Event{} = event) do
+        IO.puts "No handle defined in module #{__MODULE__}"
+      end
+
+      defoverridable [handle: 1]
     end
   end
 
