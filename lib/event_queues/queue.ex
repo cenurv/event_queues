@@ -78,7 +78,7 @@ defmodule EventQueues.Queue do
           if registry[filter] do
             Map.put(registry, filter, registry[filter] ++ [module])
           else
-            Map.put(%{}, filter, [module])
+            Map.put(registry, filter, [module])
           end
 
         {:noreply, registry}

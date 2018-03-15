@@ -21,23 +21,27 @@ defmodule EventQueues.Handler do
     library = Keyword.get opts, :library, :gen_stage
     subscribe = Keyword.get opts, :subscribe, "amq.topic"
     configuration = Keyword.get opts, :configuration, []
-    filter = "#{Keyword.get opts, :category, "*"}.#{Keyword.get opts, :name, "*"}"
+    category = Keyword.get(opts, :category, "*")
+    name = Keyword.get(opts, :name, "*")
 
     case library do
-      :exq -> exq_handler(subscribe, filter)
-      :amqp -> amqp_handler(configuration, subscribe, filter)
+      :exq -> exq_handler(subscribe, category, name)
+      :amqp -> amqp_handler(configuration, subscribe, category, name)
       :gen_stage -> gen_stage_handler(subscribe)
     end
   end
 
-  defp exq_handler(subscribe, filter) do
+  defp exq_handler(subscribe, category, name) do
     quote do
       use GenServer
 
       require Logger
 
       def start_link do
-        GenServer.cast(unquote(subscribe), {:register, unquote(filter), __MODULE__})
+        category = unquote(category)
+        name = unquote(name)
+        filter = "#{category}.#{name}"
+        GenServer.cast(unquote(subscribe), {:register, filter, __MODULE__})
         GenServer.start_link(__MODULE__, [], name: __MODULE__)
       end
 
@@ -58,7 +62,9 @@ defmodule EventQueues.Handler do
     end
   end
 
-  defp amqp_handler(configuration, subscribe, filter) do
+  defp amqp_handler(configuration, subscribe, category, name) do
+    filter = "#{category}.#{name}"
+
     quote do
       use GenServer
       use AMQP
