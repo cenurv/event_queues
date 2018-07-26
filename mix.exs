@@ -1,12 +1,12 @@
 defmodule EventQueues.Mixfile do
   use Mix.Project
 
-   @version "2.0.0"
+   @version "3.0.0"
 
   def project do
     [app: :event_queues,
      version: @version,
-     elixir: "~> 1.4",
+     elixir: "~> 1.6",
      elixirc_paths: elixirc_paths(Mix.env),
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
@@ -50,7 +50,7 @@ defmodule EventQueues.Mixfile do
     [{:gen_stage, "~> 0.12", optional: true},
      {:amqp, "~> 0.2.3", optional: true},
      {:exq, "~> 0.10", optional: true},
-     {:uuid, "~> 1.1"},
+     {:elixir_uuid, "~> 1.2", app: false, override: true},
      {:ex_doc, "~> 0.18", only: [:docs, :dev]},]
   end
 end

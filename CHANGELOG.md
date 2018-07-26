@@ -1,5 +1,10 @@
 # Change Log #
 
+## 3.0.0 ##
+
+* Moved :uuid to :elixir_uuid to avoid incomptibilities moving forward with other libraries.
+* Changed minimum Elixir version to 1.6.
+
 ## 2.0.0 ##
 
 * Added support for using AMQP (Rabbit MQ) instead of GenStage.
