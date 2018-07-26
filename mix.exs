@@ -49,8 +49,8 @@ defmodule EventQueues.Mixfile do
   defp deps do
     [{:gen_stage, "~> 0.12", optional: true},
      {:amqp, "~> 0.2.3", optional: true},
+     {:elixir_uuid, ">= 1.2.0"},
      {:exq, "~> 0.10", optional: true},
-     {:elixir_uuid, "~> 1.2.0", app: false},
      {:ex_doc, "~> 0.18", only: [:docs, :dev]},]
   end
 end
