@@ -18,18 +18,61 @@ defmodule EventQueues.Handler do
   * `:socket_options` - Extra socket options. These are appended to the default options. See http://www.erlang.org/doc/man/inet.html#setopts-2 and http://www.erlang.org/doc/man/gen_tcp.html#connect-4 for descriptions of the available options.
   """
   defmacro __using__(opts) do
-    library = Keyword.get opts, :library, :gen_stage
-    subscribe = Keyword.get opts, :subscribe, "amq.topic"
+    subscribe = Keyword.get opts, :subscribe, nil
     configuration = Keyword.get opts, :configuration, []
-    filter = "#{Keyword.get opts, :category, "*"}.#{Keyword.get opts, :name, "*"}"
+    category = Keyword.get(opts, :category, "*")
+    name = Keyword.get(opts, :name, "*")
+
+    if is_nil(subscribe) do
+      throw "Missing subscription queue module, cannot build handler."
+    end
+
+    # Check the module subcribing to set the library type.
+    # There is never a good reason to use different library on a handler
+    # then on the queue it is subscribing to.
+    library = Macro.expand(subscribe, __CALLER__).library
 
     case library do
-      :amqp -> amqp_handler(configuration, subscribe, filter)
+      :exq -> exq_handler(subscribe, category, name)
+      :amqp -> amqp_handler(configuration, subscribe, category, name)
       :gen_stage -> gen_stage_handler(subscribe)
     end
   end
 
-  defp amqp_handler(configuration, subscribe, filter) do
+  defp exq_handler(subscribe, category, name) do
+    quote do
+      use GenServer
+
+      require Logger
+
+      def start_link do
+        category = unquote(category)
+        name = unquote(name)
+        filter = "#{category}.#{name}"
+        GenServer.cast(unquote(subscribe), {:register, filter, __MODULE__})
+        GenServer.start_link(__MODULE__, [], name: __MODULE__)
+      end
+
+      def init(_opts) do
+        {:ok, nil}
+      end
+
+      def handle_cast({:handle, event}, state) do
+        __MODULE__.handle(event)
+        {:noreply, state}
+      end
+
+      def handle(%EventQueues.Event{} = event) do
+        IO.puts "No handle defined in module #{__MODULE__}"
+      end
+
+      defoverridable [handle: 1]
+    end
+  end
+
+  defp amqp_handler(configuration, subscribe, category, name) do
+    filter = "#{category}.#{name}"
+
     quote do
       use GenServer
       use AMQP

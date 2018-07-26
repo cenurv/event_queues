@@ -20,7 +20,7 @@ defmodule EventQueues.Event do
   * `created`          - Date and time the event was created. Default: `NaiveDateTime.utc_now`
   * `data`             - An open value that can be any valid Elixir term of your choosing.
   """
-  def new(fields \\ []) do
+  def create(fields \\ []) do
     id = Keyword.get fields, :id, UUID.uuid4()
     category = Keyword.get fields, :category, nil
     name = Keyword.get fields, :name, nil
@@ -35,6 +35,8 @@ defmodule EventQueues.Event do
                        created: created,
                        data: data}
   end
+
+  def new(fields \\ []), do: create(fields)
 
   def serialize(%__MODULE__{} = event) do
     event

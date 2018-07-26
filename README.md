@@ -28,15 +28,15 @@ The event queues and handlers created by this library utilize a common struct to
  * `data`             - An open value that can be any valid Elixir term of your choosing.
 
 ```elixir
-EventQueues.Event.new category: :car,
-                      name: :sold,
-                      data: %{
-                        id: 45,
-                        purchaser: %{
-                          name: "Bob Nobody"
-                        },
-                        purchased_on: Date.utc_today
-                      }
+EventQueues.Event.create category: :car,
+                         name: :sold,
+                         data: %{
+                           id: 45,
+                           purchaser: %{
+                             name: "Bob Nobody"
+                           },
+                           purchased_on: Date.utc_today
+                         }
 
 %EventQueues.Event{category: :car, created: ~N[2017-01-14 22:50:30.989000],
  data: %{id: 45, purchased_on: ~D[2017-01-14],
@@ -72,7 +72,7 @@ Queue Functions:
 * `announce_sync`         - Sends the event to the queue to be broadcast. Waits for the event to be accepted by the queue before returning.
 This does not wait for events to be handled as that event dispatching and handeling are always asynchronous.
 
-Both function take either a `EventQueues.Event` struct or a keyword list of the values for the event. See `EventQueues.Event.new/1`.
+Both function take either a `EventQueues.Event` struct or a keyword list of the values for the event. See `EventQueues.Event.create/1`.
 
 ```elixir
 VehicleInventoryQueue.announce category: :car, name: :sold, data: %{}
@@ -212,6 +212,53 @@ end
 
 ```
 
+## Exq ##
+
+As of 2.0.0, Support has been added to support the Exq worker queue for distibuting events.
+
+See the `exq` project on Hex for more details on how to setup and configure.
+
+```elixir
+defmodule VehicleInventoryQueue do
+  use EventQueues, type: :queue,
+                   library: :exq,
+                   # This configuration is default, the line is not required
+                   configuration: [concurrency: :infinite]
+
+end
+
+defmodule RegistrationVehicleHandler do
+  use EventQueues, type: :handler,
+                   subscribe: VehicleInventoryQueue,
+
+  def handle(%EventQueues.Event{category: :car, name: :sold, data: data}) do
+    # Custom logic here that would register the vehicle electronically with a government agenecy.
+  end
+  def handle(_event), do: nil
+end
+```
+
+Using Exq also allows filtering specific categories and event names for the handler.
+
+```elixir
+defmodule RegistrationVehicleHandler do
+  use EventQueues, type: :handler,
+                   subscribe: VehicleInventoryQueue,
+                   category: :category,
+                   name: :sold
+
+  def handle(%EventQueues.Event{category: :car, name: :sold, data: data}) do
+    # Custom logic here that would register the vehicle electronically with a government agenecy.
+  end
+  def handle(_event), do: nil
+end
+
+VehicleInventoryQueue.announce category: :car, name: :sold, data: %{}
+```
+
+Both the category and name options are optional and can match individually. For instance, only providing the name of "sold".
+The handler can listen events from all categories that provide an event name of "sold".
+
 ## AMQP ##
 
 As of 2.0.0, Support has been added to support the AMQP message protocol for distributing events.
@@ -226,7 +273,6 @@ end
 
 defmodule RegistrationVehicleHandler do
   use EventQueues, type: :handler,
-                   library: amqp,
                    subscribe: VehicleInventoryQueue,
                    configuration: Application.get_env(:my_app, :amqp_connection_configuration)
 
@@ -242,13 +288,12 @@ Using AMQP also allows filtering specific categories and event names for the han
 ```elixir
 defmodule RegistrationVehicleHandler do
   use EventQueues, type: :handler,
-                   library: amqp,
                    subscribe: VehicleInventoryQueue,
-                   category: :category,
+                   category: :car,
                    name: :sold,
                    configuration: Application.get_env(:my_app, :amqp_connection_configuration)
 
-  def handle(%EventQueues.Event{category: :car, name: :sold, data: data}) do
+  def handle(%EventQueues.Event{data: data}) do
     # Custom logic here that would register the vehicle electronically with a government agenecy.
   end
   def handle(_event), do: nil

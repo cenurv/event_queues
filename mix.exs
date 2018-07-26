@@ -6,12 +6,16 @@ defmodule EventQueues.Mixfile do
   def project do
     [app: :event_queues,
      version: @version,
+<<<<<<< HEAD
      elixir: "~> 1.6",
+=======
+     elixir: "~> 1.5",
+>>>>>>> 9ec20b3fab585b1c8e4a20326b899789cfeb14af
      elixirc_paths: elixirc_paths(Mix.env),
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      deps: deps(),
-     description: "Provides helpers in Elixir to create GenStage based event queues and handlers",
+     description: "Provides helpers in Elixir to create GenStage, Exq, or AMQP based event queues and handlers",
      name: "Event Queues",
      package: %{
        licenses: ["Apache 2.0"],
@@ -50,7 +54,12 @@ defmodule EventQueues.Mixfile do
     [{:gen_stage, "~> 0.12", optional: true},
      {:amqp, "~> 0.2.3", optional: true},
      {:exq, "~> 0.10", optional: true},
+<<<<<<< HEAD
      {:elixir_uuid, "~> 1.2", app: false, override: true},
      {:ex_doc, "~> 0.18", only: [:docs, :dev]},]
+=======
+     {:uuid, "~> 1.1"},
+     {:ex_doc, "~> 0.18", only: [:docs, :dev]}]
+>>>>>>> 9ec20b3fab585b1c8e4a20326b899789cfeb14af
   end
 end
